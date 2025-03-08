@@ -1,4 +1,5 @@
 import lightgbm as lgb
+import numpy as np
 from sklearn.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -33,30 +34,7 @@ def main(config_path, config_name):
             X_train, "standard"
         ), weather_data.normalize(X_test, "standard")
 
-    energy_load_model = EnergyLoadPredictor(
-        objective="reg:squarederror",  # "reg:pseudohubererror",  # "reg:squarederror"
-        n_estimators=700,
-        learning_rate=0.05,
-        max_depth=4,
-        subsample=0.9,
-        colsample_bytree=0.9,
-    )
-
     tscv = TimeSeriesSplit(n_splits=5)
-
-    # Use cross-validation to evaluate the model
-    cv_scores = cross_val_score(
-        energy_load_model.model,
-        X_train,
-        y_train,
-        cv=tscv,
-        scoring="neg_mean_absolute_error",
-    )
-    print(f"Cross-Validation MAE Scores: {cv_scores}")
-    print(f"Mean CV MAE: {-cv_scores.mean()}")
-
-    energy_load_model.fit(X_train, y_train)
-    energy_load_model.predict(X_test, y_test)
 
     ## LIGHTGBM
 
@@ -73,6 +51,7 @@ def main(config_path, config_name):
         "bagging_fraction": 0.9815,
         "bagging_freq": 5,
     }
+    maes, rmses, mapes = [], [], []
 
     for train_idx, test_idx in tscv.split(X):
         X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
@@ -82,23 +61,42 @@ def main(config_path, config_name):
         train_data = lgb.Dataset(X_train, label=y_train)
         valid_data = lgb.Dataset(X_test, label=y_test, reference=train_data)
 
+        # model = lgb.train(
+        #     params,
+        #     train_data,
+        #     valid_sets=[valid_data],
+        #     num_boost_round=500,
+        # )
+
         model = lgb.train(
             params,
             train_data,
-            valid_sets=[valid_data],
-            num_boost_round=500,
+            valid_sets=[train_data, valid_data],
+            valid_names=["train", "valid"],
+            callbacks=[lgb.early_stopping(stopping_rounds=50), lgb.log_evaluation(50)],
         )
 
         # Predict and evaluate
         y_pred = model.predict(X_test, num_iteration=model.best_iteration)
 
         mae = mean_absolute_error(y_test, y_pred)
+        maes.append(mae)
         rmse = mean_squared_error(y_test, y_pred) ** 0.5
+        rmses.append(rmse)
         mape = mean_absolute_percentage_error(y_test, y_pred)
+        mapes.append(mape)
 
-        print(
-            f"LightGBM Performance - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}"
-        )
+    worst_rmse = np.max(rmses)
+    print("Worst RMSE:", worst_rmse)
+    std_rmse = np.std(rmses)
+    print("Standard Deviation of RMSE:", std_rmse)
+
+    avg_mae = np.mean(maes)
+    avg_rmse = np.mean(rmses)
+    avg_mape = np.mean(mapes)
+    print(
+        f"LightGBM Performance - MAE: {avg_mae:.2f}, RMSE: {avg_rmse:.2f}, MAPE: {avg_mape:.2f}"
+    )
 
 
 if __name__ == "__main__":

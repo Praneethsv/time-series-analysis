@@ -37,11 +37,12 @@ class EnergyLoadPredictor:
         self.model.fit(X_train, y_train)
         return self.model
 
-    def predict(self, X_test, y_test) -> None:
+    def predict(self, X_test, y_test, verbose=False) -> None:
         y_pred = self.model.predict(X_test)
 
-        print("Sample y_test:", y_test[:5])
-        print("Sample y_pred:", y_pred[:5])
+        if verbose:
+            print("Sample y_test:", y_test[:5])
+            print("Sample y_pred:", y_pred[:5])
 
         # evaluation metrics
         mean_abs_err = mean_absolute_error(y_test, y_pred)
@@ -52,6 +53,8 @@ class EnergyLoadPredictor:
         print(f"MAE: {mean_abs_err:.2f}")
         print(f"RMSE: {r_mean_square_err:.2f}")
         print(f"MAPE: {mean_abs_perc_error:.2%}")
+
+        return y_pred
 
     def save(self, name):
         self.model.save_model(name)

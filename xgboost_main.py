@@ -1,0 +1,65 @@
+import lightgbm as lgb
+import numpy as np
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+)
+from sklearn.model_selection import TimeSeriesSplit, cross_val_score
+
+from cfg_loader import ConfigLoader
+from csv_loader import CSVDataLoader
+from model import EnergyLoadPredictor
+from utils import detect_outliers_quantile, detect_outliers_z_score
+
+
+def main(config_path, config_name):
+    cfg = ConfigLoader(config_path, config_name).load()
+    data_loader_cfg = cfg.get("data_loader")
+
+    weather_data = CSVDataLoader(data_loader_cfg["path"])
+
+    X, y = weather_data.prepare_features()
+
+    if data_loader_cfg["remove_outliers"]:
+        # remove outliers
+        outliers = detect_outliers_z_score(y)
+        y = y[~y.index.isin(outliers.index)]
+        X = X.loc[y.index]
+
+    X_train, X_test, y_train, y_test = weather_data.split(X, y)
+
+    if data_loader_cfg["normalize"]:
+        X_train, X_test = weather_data.normalize(
+            X_train, "standard"
+        ), weather_data.normalize(X_test, "standard")
+
+    energy_load_model = EnergyLoadPredictor(
+        objective="reg:squarederror",  # "reg:pseudohubererror",  # "reg:squarederror"
+        n_estimators=700,
+        learning_rate=0.05,
+        max_depth=4,
+        subsample=0.9,
+        colsample_bytree=0.9,
+    )
+
+    tscv = TimeSeriesSplit(n_splits=5)
+
+    # Use cross-validation to evaluate the model
+    cv_scores = cross_val_score(
+        energy_load_model.model,
+        X_train,
+        y_train,
+        cv=tscv,
+        scoring="neg_mean_absolute_error",
+    )
+    print(f"Cross-Validation MAE Scores: {cv_scores}")
+    print(f"Mean CV MAE: {-cv_scores.mean()}")
+
+    energy_load_model.fit(X_train, y_train)
+    energy_load_model.predict(X_test, y_test)
+
+
+if __name__ == "__main__":
+
+    main("configs", "config")

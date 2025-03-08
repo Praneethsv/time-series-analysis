@@ -1,7 +1,7 @@
 
 data_loader:
   path: "/home/sv/Documents/time-series-analysis/weatherkit_plus_load.csv" # replace with your own path
-  remove_outliers: True
+  remove_outliers: False
   normalize: False
   num_lags: 3 # number of load lag features to compute
   
