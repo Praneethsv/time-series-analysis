@@ -65,9 +65,9 @@ class CSVDataLoader:
         scaled_data = scaler.fit_transform(data)
         return scaled_data
 
-    def split(self, X, y):
+    def split(self, X, y, test_size=0.2, shuffle=False):
         # TODO: Can use time-based splitting techniques
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, shuffle=False
+            X, y, test_size=test_size, shuffle=shuffle
         )
         return X_train, X_test, y_train, y_test
