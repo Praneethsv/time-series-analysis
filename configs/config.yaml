@@ -1,7 +1,7 @@
 
 data_loader:
   path: "/home/sv/Documents/time-series-analysis/weatherkit_plus_load.csv" # replace with your own path
-  remove_outliers: False
+  remove_outliers: True
   normalize: False
   num_lags: 3 # number of load lag features to compute
   
@@ -19,12 +19,16 @@ model:
     random_state: 42
 
   lightgbm:
-    objective: "regression"
-    metric": "rmse"
-    boosting_type: "gbdt"
-    num_leaves": 31
-    learning_rate: 0.01
-    feature_fraction: 0.9
+    num_leaves: 292
+    max_depth: 10
+    learning_rate: 0.0472482796526682
+    min_data_in_leaf: 32
+    lambda_l1: 1.2927743955065722e-05
+    lambda_l2: 1.1572147572170338e-07
+    feature_fraction: 0.977436398539705
+    bagging_fraction: 0.5759941094908022
+    bagging_freq: 9
+    objective: regression
 
 visualizer:
   alpha: 0.7
