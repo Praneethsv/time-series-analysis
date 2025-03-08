@@ -1,6 +1,5 @@
 import json
 import pickle
-from pathlib import Path
 
 import xgboost as xgb
 from sklearn.metrics import (
