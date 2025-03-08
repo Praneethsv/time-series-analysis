@@ -4,9 +4,9 @@ numpy
 seaborn
 xgboost
 lightgbm
+catboost
 optuna
 statsmodels
 pmdarima
-fbprophet
 matplotlib
 hydra-core
