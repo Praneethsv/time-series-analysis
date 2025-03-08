@@ -1,6 +1,6 @@
 # Time Series Analysis
 
-This repository contains code for performing time series analysis. It includes various models and methods for forecasting and analyzing time series data, such as ARIMA, Prophet, and others.
+This repository contains code for performing time series analysis. It includes various models and methods for forecasting and analyzing time series data, such as ARIMA, XGBoost, and LightGBM.
 
 ## Installation
 
