@@ -30,6 +30,15 @@ model:
     bagging_freq: 9
     objective: regression
 
+  catboost:
+    iterations: 1000
+    learning_rate: 0.13786576194363528
+    depth: 7
+    loss_function: "RMSE"
+    l2_leaf_reg: 7.76873502580487e-08
+    bagging_temperature: 0.7329476073761131
+    random_strength: 0.0627338404379398
+
 visualizer:
   alpha: 0.7
 
