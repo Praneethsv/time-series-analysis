@@ -28,9 +28,19 @@ pip install -r requirements.txt
 ### 3. Verify Installation
 
 Verify the installation by running the following command:
+
+To fit xgboost model run the following command:
 ```bash
 python xgboost_main.py
 ```
+To fit lightgbm model run the following command:
+```bash
+python lightgbm_main.py
+```
 
+To fit catboost model run the following command:
+```bash
+python catboost_main.py
+```
 
 

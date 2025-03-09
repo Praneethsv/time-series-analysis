@@ -1,4 +1,4 @@
-
+import xgboost as xgb
 from sklearn.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -42,6 +42,33 @@ def main(config_path, config_name):
         colsample_bytree=0.9,
     )
 
+    # energy_load_model = xgb.XGBRegressor(
+    #     objective="reg:squarederror",
+    #     learning_rate=0.10881423369683225,
+    #     max_depth=9,
+    #     eval_metric="rmse",
+    #     min_child_weight=1,
+    #     alpha=2.6445390308358276e-07,
+    #     subsample=0.9444859273350957,
+    #     colsample_bytree=0.85611557093695,
+    #     random_state=42,
+    #     n_estimators=300,
+    # )
+
+    # energy_load_model = xgb.XGBRegressor(
+    #     objective="reg:squarederror",
+    #     learning_rate=0.044902247165282884,
+    #     max_depth=10,
+    #     eval_metric="rmse",
+    #     min_child_weight=1,
+    #     alpha=2.1368030534944994e-05,
+    #     subsample=0.8212183597751991,
+    #     colsample_bytree=0.9764746706925298,
+    #     random_state=42,
+    #     n_estimators=300,
+    #     tree_method="hist",
+    # )
+
     tscv = TimeSeriesSplit(n_splits=5)
 
     # Use cross-validation to evaluate the model
@@ -56,6 +83,11 @@ def main(config_path, config_name):
     print(f"Mean CV MAE: {-cv_scores.mean()}")
 
     energy_load_model.fit(X_train, y_train)
+
+    model_path = "xgboost_model.json"
+    energy_load_model.save(model_path)
+    print(f"Model saved to {model_path}")
+
     energy_load_model.predict(X_test, y_test)
 
 

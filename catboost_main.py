@@ -34,20 +34,8 @@ def main(config_path, config_name):
 
     params = dict(cfg.get("model").get("catboost"))
 
-    ## CATBOOST
-    # catboost_model = CatBoostRegressor(
-    #     iterations=1000,
-    #     learning_rate=0.13786576194363528,
-    #     depth=7,
-    #     loss_function="RMSE",
-    #     l2_leaf_reg=7.76873502580487e-08,
-    #     bagging_temperature=0.7329476073761131,
-    #     random_strength=0.0627338404379398,
-    # )
-
     catboost_model = CatBoostRegressor(**params)
 
-    # Fit the model
     catboost_model.fit(
         X_train,
         y_train,
@@ -56,10 +44,12 @@ def main(config_path, config_name):
         verbose=False,
     )
 
-    # Predictions
+    model_path = "catboost_model.cbm"
+    catboost_model.save_model(model_path)
+    print(f"Model saved to {model_path}")
+
     y_pred = catboost_model.predict(X_val)
 
-    # Compute metrics
     mae = mean_absolute_error(y_val, y_pred)
     rmse = mean_squared_error(y_val, y_pred) ** 0.5
     mape = np.mean(np.abs((y_val - y_pred) / y_val)) * 100

@@ -129,5 +129,5 @@ class ModelTuner:
 
 
 if __name__ == "__main__":
-    model_tuner = ModelTuner("configs", "config", "xgboost")
+    model_tuner = ModelTuner("configs", "config", "catboost")
     model_tuner.tune_and_train()

@@ -10,9 +10,9 @@ class DataVisualizer:
         self.df = df
 
     def visualize(self):
-        # self.box_plot_load()
-        # self.histogram()
-        # self.time_series_load_plot()
+        self.box_plot_load()
+        self.histogram()
+        self.time_series_load_plot()
         self.weather_overlay_load_plot()
 
     def box_plot_load(self):
@@ -97,7 +97,7 @@ class DataVisualizer:
             df.index,
             df["weatherkit_observed_cloud_cover_pc"],
             label="Cloud Cover (%)",
-            color="yellow",
+            color="black",
             alpha=0.7,
         )
 

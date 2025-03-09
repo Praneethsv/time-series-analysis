@@ -40,6 +40,9 @@ def main(config_path, config_name):
     model_cfg = dict(cfg.get("model").get("lightgbm"))
     maes, rmses, mapes = [], [], []
 
+    best_model_path = "lightgbm_model.txt"
+    best_rmse = float("inf")
+
     for train_idx, test_idx in tscv.split(X):
         X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
         y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
@@ -64,6 +67,10 @@ def main(config_path, config_name):
         rmses.append(rmse)
         mape = mean_absolute_percentage_error(y_test, y_pred)
         mapes.append(mape)
+
+        if rmse < best_rmse:
+            best_rmse = rmse
+            model.save_model(best_model_path)
 
     worst_rmse = np.max(rmses)
     print("Worst RMSE:", worst_rmse)
