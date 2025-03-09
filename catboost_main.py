@@ -32,14 +32,20 @@ def main(config_path, config_name):
             X_train, "standard"
         ), weather_data.normalize(X_test, "standard")
 
+    params = dict(cfg.get("model").get("catboost"))
+
     ## CATBOOST
-    catboost_model = CatBoostRegressor(
-        iterations=1000,
-        learning_rate=0.05,
-        depth=10,
-        loss_function="RMSE",
-        cat_features=[],
-    )
+    # catboost_model = CatBoostRegressor(
+    #     iterations=1000,
+    #     learning_rate=0.13786576194363528,
+    #     depth=7,
+    #     loss_function="RMSE",
+    #     l2_leaf_reg=7.76873502580487e-08,
+    #     bagging_temperature=0.7329476073761131,
+    #     random_strength=0.0627338404379398,
+    # )
+
+    catboost_model = CatBoostRegressor(**params)
 
     # Fit the model
     catboost_model.fit(
