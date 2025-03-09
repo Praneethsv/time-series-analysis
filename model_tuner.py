@@ -96,8 +96,10 @@ class ModelTuner:
 
         return mae + rmse + mape  # Minimize all three combined
 
-    def tune_and_train(self, n_trials=50):
-        study = optuna.create_study(direction="minimize")
+    def tune_and_train(self, n_trials=500):
+        study = optuna.create_study(
+            direction="minimize", sampler=optuna.samplers.TPESampler(seed=42)
+        )
         study.optimize(lambda trial: self.objective(trial), n_trials=n_trials)
 
         print("\nBest parameters found:", study.best_params)
@@ -127,5 +129,5 @@ class ModelTuner:
 
 
 if __name__ == "__main__":
-    model_tuner = ModelTuner("configs", "config", "catboost")
+    model_tuner = ModelTuner("configs", "config", "xgboost")
     model_tuner.tune_and_train()
