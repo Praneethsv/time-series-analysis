@@ -9,7 +9,6 @@ from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 
 from cfg_loader import ConfigLoader
 from csv_loader import CSVDataLoader
-from model import EnergyLoadPredictor
 from utils import detect_outliers_quantile, detect_outliers_z_score
 
 
@@ -18,11 +17,11 @@ def main(config_path, config_name):
     data_loader_cfg = cfg.get("data_loader")
 
     weather_data = CSVDataLoader(data_loader_cfg["path"])
-    cols = weather_data.get_cols()
+
     X, y = weather_data.prepare_features()
 
     if data_loader_cfg["remove_outliers"]:
-        # remove outliers
+
         outliers = detect_outliers_z_score(y)
         y = y[~y.index.isin(outliers.index)]
         X = X.loc[y.index]
@@ -38,38 +37,18 @@ def main(config_path, config_name):
 
     ## LIGHTGBM
 
-    params = {
-        "objective": "regression",
-        "metric": "rmse",
-        "boosting_type": "gbdt",
-        "num_leaves": 142,
-        "learning_rate": 0.03272,
-        "min_data_in_leaf": 43,
-        "lambda_l1": 1.26633,
-        "lambda_l2": 0.008,
-        "feature_fraction": 0.9798,
-        "bagging_fraction": 0.9815,
-        "bagging_freq": 5,
-    }
+    model_cfg = dict(cfg.get("model").get("lightgbm"))
     maes, rmses, mapes = [], [], []
 
     for train_idx, test_idx in tscv.split(X):
         X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
         y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
 
-        # Train LightGBM model
         train_data = lgb.Dataset(X_train, label=y_train)
         valid_data = lgb.Dataset(X_test, label=y_test, reference=train_data)
 
-        # model = lgb.train(
-        #     params,
-        #     train_data,
-        #     valid_sets=[valid_data],
-        #     num_boost_round=500,
-        # )
-
         model = lgb.train(
-            params,
+            model_cfg,
             train_data,
             valid_sets=[train_data, valid_data],
             valid_names=["train", "valid"],
