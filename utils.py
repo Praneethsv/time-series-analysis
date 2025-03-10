@@ -1,5 +1,6 @@
 import pandas as pd
 from scipy.stats import zscore
+from statsmodels.tsa.stattools import adfuller
 
 
 def detect_outliers_quantile(y: pd.DataFrame, verbose=False):
@@ -25,3 +26,10 @@ def detect_outliers_z_score(y, verbose=False):
         print("Number of outliers detected based on z-score:", len(outliers))
         print(outliers)
     return outliers
+
+
+def is_stationary(y):
+    res = adfuller(y)
+    adf_stats = res[0]
+    p_val = res[1]
+    return True if p_val < 0.05 else False
