@@ -28,7 +28,7 @@ cd time-series-analysis
 
 4. Open the `config.yaml` file and modify the path variable under data_loader to point out the time series data (csv format).
 
-5. Give the parameters of your choice for any of the available models under model in `config.yaml`. 
+5. Give the parameters of your choice for any of the available models under model in `config.yaml` or just run the main files as described below with already tuned parameters set in the config. 
 
 
 ### 3. Verify Installation
