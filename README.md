@@ -13,21 +13,27 @@ git clone https://github.com/Praneethsv/time-series-analysis.git
 
 cd time-series-analysis
 
-pip install -r requirements.txt
-
 ```
 
-### 2. Configuration
+### 2. Set up & Configuration
 
+1. Create a conda environment using the following command:
+    `conda create --name myenv python=3.9`
 
-1. Open the `config.yaml` file and modify the path variable under data_loader to point out the time series data (csv format)
+2. Activate the conda environment using the following command:
+    `conda activate myenv`
 
-2. Give the parameters of your choice for any of the models under model in `config.yaml` 
+3. Install the dependencies using: 
+    `pip install -r requirements.txt`
+
+4. Open the `config.yaml` file and modify the path variable under data_loader to point out the time series data (csv format).
+
+5. Give the parameters of your choice for any of the available models under model in `config.yaml`. 
 
 
 ### 3. Verify Installation
 
-Verify the installation by running the following command:
+Verify the installation by running the following commands:
 
 To fit xgboost model run the following command:
 ```bash
@@ -43,4 +49,7 @@ To fit catboost model run the following command:
 python catboost_main.py
 ```
 
+## Note:  
+
+All the trained models are saved in the current working directory when you run main files of xgboost, lightgbm, and catboost.
 
