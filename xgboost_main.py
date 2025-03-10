@@ -8,7 +8,7 @@ from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 
 from cfg_loader import ConfigLoader
 from csv_loader import CSVDataLoader
-from model import EnergyLoadPredictor
+from energy_load_predictor import EnergyLoadPredictor
 from utils import detect_outliers_quantile, detect_outliers_z_score
 
 
@@ -21,7 +21,6 @@ def main(config_path, config_name):
     X, y = weather_data.prepare_features()
 
     if data_loader_cfg["remove_outliers"]:
-        # remove outliers
         outliers = detect_outliers_z_score(y)
         y = y[~y.index.isin(outliers.index)]
         X = X.loc[y.index]
@@ -33,15 +32,11 @@ def main(config_path, config_name):
             X_train, "standard"
         ), weather_data.normalize(X_test, "standard")
 
-    energy_load_model = EnergyLoadPredictor(
-        objective="reg:squarederror",  # "reg:pseudohubererror",  # "reg:squarederror"
-        n_estimators=700,
-        learning_rate=0.05,
-        max_depth=4,
-        subsample=0.9,
-        colsample_bytree=0.9,
-    )
+    model_cfg = dict(cfg.get("model").get("xgboost"))
 
+    energy_load_model = EnergyLoadPredictor(**model_cfg)
+
+    # other param configurations found through hyper parameter tuning; one can experiment
     # energy_load_model = xgb.XGBRegressor(
     #     objective="reg:squarederror",
     #     learning_rate=0.10881423369683225,
@@ -71,7 +66,6 @@ def main(config_path, config_name):
 
     tscv = TimeSeriesSplit(n_splits=5)
 
-    # Use cross-validation to evaluate the model
     cv_scores = cross_val_score(
         energy_load_model.model,
         X_train,
@@ -88,7 +82,7 @@ def main(config_path, config_name):
     energy_load_model.save(model_path)
     print(f"Model saved to {model_path}")
 
-    energy_load_model.predict(X_test, y_test)
+    energy_load_model.predict(X_test, y_test) # here y_test is being used to evaluate the performance
 
 
 if __name__ == "__main__":

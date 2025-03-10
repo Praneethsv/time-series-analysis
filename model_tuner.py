@@ -94,7 +94,7 @@ class ModelTuner:
         mae = mean_absolute_error(self.y_val, y_pred)
         mape = mean_absolute_percentage_error(self.y_val, y_pred)
 
-        return mae + rmse + mape  # Minimize all three combined
+        return mae + rmse + mape
 
     def tune_and_train(self, n_trials=500):
         study = optuna.create_study(

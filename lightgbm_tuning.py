@@ -12,8 +12,6 @@ from sklearn.model_selection import train_test_split
 from csv_loader import CSVDataLoader
 from utils import detect_outliers_z_score
 
-# Load the dataset
-
 df = CSVDataLoader("./weatherkit_plus_load.csv")
 X, y = df.prepare_features()
 
@@ -21,13 +19,10 @@ outliers = detect_outliers_z_score(y)
 y = y[~y.index.isin(outliers.index)]
 X = X.loc[y.index]
 
-# Train-test split
-X_train, X_val, y_train, y_val = train_test_split(
-    X, y, test_size=0.2, shuffle=False
-)  # Time series split
+
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=False)
 
 
-# Define the objective function for optimization
 def objective(trial):
     params = {
         "objective": "regression",
@@ -45,7 +40,6 @@ def objective(trial):
         "n_estimators": 300,  # Fixed, but can be tuned further
     }
 
-    # Train model
     train_data = lgb.Dataset(X_train, label=y_train)
     val_data = lgb.Dataset(X_val, label=y_val, reference=train_data)
 
@@ -57,16 +51,14 @@ def objective(trial):
         callbacks=[lgb.early_stopping(stopping_rounds=50), lgb.log_evaluation(50)],
     )
 
-    # Predictions & performance metrics calculation
     y_pred = model.predict(X_val)
     rmse = mean_squared_error(y_val, y_pred) ** 0.5
     mae = mean_absolute_error(y_val, y_pred)
     mape = mean_absolute_percentage_error(y_val, y_pred)
 
-    return mae + rmse + mape  # Optuna minimizes MAE, RMSE, MAPE
+    return mae + rmse + mape  # minimize MAE, RMSE, MAPE combined
 
 
-# Run Optuna optimization
 study = optuna.create_study(direction="minimize")
 study.optimize(objective, n_trials=50)
 
@@ -74,7 +66,7 @@ study.optimize(objective, n_trials=50)
 print("Best parameters found: ", study.best_params)
 print("Best RMSE: ", study.best_value)
 
-# Train final model with best parameters
+
 best_params = study.best_params
 best_params["objective"] = "regression"
 best_params["metric"] = "rmse"
@@ -82,16 +74,16 @@ best_params["metric"] = "rmse"
 
 best_model = lgb.train(best_params, lgb.Dataset(X_train, label=y_train))
 
-# Make predictions
+
 final_predictions = best_model.predict(X_val, num_iteration=best_model.best_iteration)
 
 
-print("\n🔍 Best Parameters Found:")
+print("\n Best Parameters Found:")
 
 for k, v in best_params.items():
     print(f"{k}: {v}")
 
-# Final RMSE
+
 final_rmse = mean_squared_error(y_val, final_predictions) ** 0.5
 print(f"Final Model RMSE: {final_rmse:.4f}")
 

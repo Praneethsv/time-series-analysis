@@ -58,7 +58,6 @@ def main(config_path, config_name):
             callbacks=[lgb.early_stopping(stopping_rounds=50), lgb.log_evaluation(50)],
         )
 
-        # Predict and evaluate
         y_pred = model.predict(X_test, num_iteration=model.best_iteration)
 
         mae = mean_absolute_error(y_test, y_pred)
