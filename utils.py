@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pandas as pd
 from scipy.stats import zscore
 from statsmodels.tsa.stattools import adfuller
@@ -33,3 +35,19 @@ def is_stationary(y):
     adf_stats = res[0]
     p_val = res[1]
     return True if p_val < 0.05 else False
+
+
+def predict(model, forecast_data: pd.DataFrame) -> pd.Series:
+    if forecast_data.empty:
+        raise ValueError("Forecast data is empty. Cannot make predictions.")
+
+    y_pred = model.predict(forecast_data)
+
+    prediction_time = datetime.now() + timedelta(days=1)
+    timestamps = pd.date_range(
+        start=prediction_time.replace(hour=0, minute=0, second=0),
+        periods=len(y_pred),
+        freq="H",
+    )
+
+    return pd.Series(y_pred, index=timestamps)
